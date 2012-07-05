@@ -138,6 +138,7 @@ module CASServer
       end
       
       config.merge! HashWithIndifferentAccess.new(YAML.load(config_file))
+      config[:validate_ssl] = true if config[:validate_ssl].nil?
       set :server, config[:server] || 'webrick'
     end
     
@@ -148,6 +149,8 @@ module CASServer
       init_database!
       init_logger!
       init_authenticators!
+      
+      self.config[:validate_ssl] ||= true
     end
 
     def self.handler_options

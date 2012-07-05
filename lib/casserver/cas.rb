@@ -75,6 +75,8 @@ module CASServer::CAS
     uri = URI.parse(pgt_url)
     https = Net::HTTP.new(uri.host,uri.port)
     https.use_ssl = validate_ssl
+    
+    puts "we will validate ssl: #{validate_ssl}"
 
     # Here's what's going on here:
     #

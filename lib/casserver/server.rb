@@ -649,7 +649,7 @@ module CASServer
 			if @success
         @username = st.username
         if @pgt_url
-          pgt = generate_proxy_granting_ticket(@pgt_url, st)
+          pgt = generate_proxy_granting_ticket(@pgt_url, st, config[:validate_ssl])
           @pgtiou = pgt.iou if pgt
         end
         @extra_attributes = st.granted_by_tgt.extra_attributes || {}
@@ -688,7 +688,7 @@ module CASServer
         end
 
         if @pgt_url
-          pgt = generate_proxy_granting_ticket(@pgt_url, t)
+          pgt = generate_proxy_granting_ticket(@pgt_url, t, config[:validate_ssl])
           @pgtiou = pgt.iou if pgt
         end
 

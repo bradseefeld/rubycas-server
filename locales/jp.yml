@@ -24,3 +24,5 @@ label:
 
 button:
   login: "ログイン"
+  lost_password: "Lost password?"
+  contact_g2: "Contact G2 Client Services"

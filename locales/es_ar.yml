@@ -24,3 +24,5 @@ label:
 
 button:
   login: "INICIAR SESIÓN"
+  lost_password: "¿Perdio su contraseña?"
+  contact_g2: "Contacte al servicio de clientes G2"

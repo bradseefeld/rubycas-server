@@ -71,12 +71,17 @@ module CASServer::CAS
     pt
   end
 
-  def generate_proxy_granting_ticket(pgt_url, st, validate_ssl = true)
+  def generate_proxy_granting_ticket(pgt_url, st, validate_ssl = true, limit = 10)
+    $LOG.debug "Attempting to generate a proxy granting ticket for #{st}"
+    if limit <= 0
+      $LOG.warn "Generate proxy granting ticket limit has reached 0 and it will no longer be tried. This usually happens when there is an infinite redirect loop."
+      return  nil
+    end
+
     uri = URI.parse(pgt_url)
     https = Net::HTTP.new(uri.host,uri.port)
-    https.use_ssl = validate_ssl
-    
-    puts "we will validate ssl: #{validate_ssl}"
+    https.use_ssl = uri.scheme == "https"
+    https.verify_mode = OpenSSL::SSL::VERIFY_NONE unless validate_ssl
 
     # Here's what's going on here:
     #
@@ -100,11 +105,16 @@ module CASServer::CAS
       #         in-practice standard.
       path += (uri.query.nil? || uri.query.empty? ? '?' : '&') + "pgtId=#{pgt.ticket}&pgtIou=#{pgt.iou}"
 
+      $LOG.debug "Making PGT callback to #{path}"
       response = conn.request_get(path)
       # TODO: follow redirects... 2.5.4 says that redirects MAY be followed
       # NOTE: The following response codes are valid according to the JA-SIG implementation even without following redirects
       
-      if %w(200 202 301 302 304).include?(response.code)
+      if %w(301 302).include?(response.code) && response["Location"]
+        location = response["Location"].gsub("pgtId=#{pgt.ticket}&pgtIou=#{pgt.iou}", "").gsub(/\?$/, "")
+        $LOG.debug "PGT callback wants to redirect to #{location}. Following..."
+        generate_proxy_granting_ticket(location, st, validate_ssl, limit - 1)
+      elsif %w(200 202 304).include?(response.code)
         # 3.4 (proxy-granting ticket IOU)
         pgt.save!
         $LOG.debug "PGT generated for pgt_url '#{pgt_url}': #{pgt.inspect}"

@@ -1,6 +1,6 @@
 $gemspec = Gem::Specification.new do |s|
   s.name     = 'g2rubycas-server'
-  s.version  = '1.1.1.3'
+  s.version  = '1.1.1.12'
   s.authors  = ["Matt Zukowski"]
   s.email    = ["matt@zukowski.ca"]
   s.homepage = 'https://github.com/rubycas/rubycas-server'

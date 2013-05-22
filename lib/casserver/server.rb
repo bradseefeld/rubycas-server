@@ -133,6 +133,7 @@ module CASServer
       end
 
       config.merge! HashWithIndifferentAccess.new(YAML.load(config_file))
+      config[:validate_ssl] = true if config[:validate_ssl].nil?
       set :server, config[:server] || 'webrick'
     end
 
@@ -629,6 +630,7 @@ module CASServer
 
     # 2.5.1
     get "#{uri_path}/serviceValidate" do
+<<<<<<< HEAD
       CASServer::Utils::log_controller_action(self.class, params)
 
       # force xml content type
@@ -652,6 +654,25 @@ module CASServer
             @pgtiou = pgt.iou if pgt
           end
           @extra_attributes = st.granted_by_tgt.extra_attributes || {}
+=======
+			CASServer::Utils::log_controller_action(self.class, params)
+
+			# required
+			@service = clean_service_url(params['service'])
+			@ticket = params['ticket']
+			# optional
+			@pgt_url = params['pgtUrl']
+			@renew = params['renew']
+
+			st, @error = validate_service_ticket(@service, @ticket)
+			@success = st && !@error
+
+			if @success
+        @username = st.username
+        if @pgt_url
+          pgt = generate_proxy_granting_ticket(@pgt_url, st, config[:validate_ssl])
+          @pgtiou = pgt.iou if pgt
+>>>>>>> g2/master
         end
       else
         @success = false
@@ -696,7 +717,7 @@ module CASServer
           end
 
           if @pgt_url
-            pgt = generate_proxy_granting_ticket(@pgt_url, t)
+            pgt = generate_proxy_granting_ticket(@pgt_url, t, config[:validate_ssl])
             @pgtiou = pgt.iou if pgt
           end
 
